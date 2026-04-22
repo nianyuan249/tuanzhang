@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的团长我的团 · 炮灰人格测试</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Noto Serif SC', serif;
+            background: linear-gradient(145deg, #1a1e2b 0%, #232838 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            padding: 16px; color: #e8e9eb;
+        }
+        .test-container {
+            max-width: 720px; width: 100%; margin: 0 auto;
+            background: rgba(28, 33, 48, 0.8); backdrop-filter: blur(20px);
+            border: 1px solid rgba(220, 200, 140, 0.2); border-radius: 48px;
+            box-shadow: 0 25px 50px -8px rgba(0,0,0,0.6); padding: 28px 24px 32px;
+        }
+        .screen { display: none; opacity: 0; transition: opacity 0.45s; }
+        .screen.active { display: block; opacity: 1; }
+        .welcome-screen { text-align: center; padding: 16px 0 8px; }
+        .military-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(140, 110, 70, 0.25); padding: 8px 24px;
+            border-radius: 60px; border: 1px solid rgba(220, 200, 140, 0.35);
+            margin-bottom: 28px; backdrop-filter: blur(8px); color: #d4c5a9;
+        }
+        h1 {
+            font-family: 'Noto Serif SC', serif; font-size: 2.8rem; font-weight: 700;
+            background: linear-gradient(135deg, #f3e7c4 0%, #d4bc8a 70%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .subhead { color: #b3a68f; margin-bottom: 32px; border-bottom: 1px dashed rgba(200,170,120,0.4); padding-bottom: 24px; }
+        .quote-block {
+            background: rgba(18,22,33,0.7); border-left: 6px solid #b99e6b;
+            padding: 20px 22px; margin: 32px 0 36px; border-radius: 20px;
+            text-align: left; backdrop-filter: blur(8px);
+        }
+        .quote-text { font-size: 1.2rem; font-style: italic; color: #ece3d0; font-family: 'Noto Serif SC', serif; }
+        .quote-author { color: #b99e6b; font-weight: 500; }
+        .btn {
+            background: linear-gradient(145deg, #2a3246 0%, #1f2536 100%);
+            border: 1px solid rgba(185,158,107,0.45); color: #f0e5d5;
+            padding: 16px 32px; font-size: 1.3rem; font-weight: 600;
+            border-radius: 60px; cursor: pointer; width: 100%; max-width: 300px;
+            margin: 0 auto; display: inline-block; letter-spacing: 2px;
+            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.5);
+        }
+        .btn:hover { background: #2f3b55; border-color: #c9a96b; color: #fff; transform: translateY(-2px); }
+        .character-preview { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; margin: 30px 0 10px; }
+        .char-tag { background: rgba(60,70,90,0.5); padding: 6px 18px; border-radius: 40px; border: 1px solid rgba(180,150,100,0.3); color: #d8cfbc; }
+        .test-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+        .progress-container { flex: 1; margin-right: 20px; }
+        .progress-bar-bg { height: 6px; background: #2d3448; border-radius: 20px; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #b99e6b, #dac292); border-radius: 20px; transition: width 0.3s; }
+        .q-counter { color: #b7aa93; font-weight: 500; min-width: 70px; text-align: right; }
+        .question-card {
+            background: rgba(18,22,33,0.6); backdrop-filter: blur(16px);
+            border-radius: 36px; padding: 28px 22px 32px;
+            border: 1px solid rgba(210,180,130,0.2); margin: 10px 0 30px;
+        }
+        .question-text { font-size: 1.5rem; font-weight: 600; margin-bottom: 32px; color: #f3e9da; font-family: 'Noto Serif SC', serif; }
+        .options { display: flex; flex-direction: column; gap: 14px; }
+        .option {
+            background: rgba(44,52,73,0.7); border: 1.5px solid rgba(200,180,140,0.2);
+            border-radius: 50px; padding: 18px 22px; font-size: 1.1rem;
+            color: #e3d9c9; cursor: pointer; backdrop-filter: blur(8px);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .option i { color: #b99e6b; width: 24px; text-align: center; }
+        .option:hover { background: #3f4a62; border-color: #c9a96b; }
+        .option.selected { background: #3f4a62; border-color: #c9a96b; box-shadow: 0 0 0 2px rgba(201,169,107,0.4); }
+        .nav-buttons { display: flex; gap: 16px; }
+        .nav-btn {
+            background: transparent; border: 1.5px solid #5a637b; color: #cfc5b2;
+            padding: 14px 24px; border-radius: 40px; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; flex: 1; backdrop-filter: blur(8px);
+        }
+        .nav-btn:hover { border-color: #b99e6b; background: #2a324a; }
+        .nav-btn:disabled { opacity: 0.4; pointer-events: none; }
+        .result-header { text-align: center; margin: 8px 0 20px; }
+        .result-badge { background: #3b445b; display: inline-block; padding: 6px 24px; border-radius: 30px; color: #d4be9b; }
+        .character-name {
+            font-size: 3.2rem; font-weight: 700; font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #e9dbba, #c9a96b);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .character-nickname { font-size: 1.5rem; color: #bbaa90; margin-bottom: 10px; }
+        .character-desc {
+            background: #1e2538; padding: 24px; border-radius: 28px;
+            margin: 22px 0 26px; border: 1px solid #4e4f5e; color: #dbd2c3;
+            line-height: 1.6; text-align: left;
+        }
+        .match-stats { display: flex; justify-content: space-around; margin: 24px 0 20px; }
+        .stat-value { font-size: 2.2rem; font-weight: 700; color: #dac292; }
+        .stat-label { font-size: 0.9rem; color: #9a9489; }
+        .action-buttons { display: flex; gap: 16px; }
+        .small-note { color: #7e8577; margin-top: 20px; text-align: center; font-size: 0.8rem; }
+        @media (max-width: 500px) {
+            .test-container { padding: 20px 16px; border-radius: 36px; }
+            h1 { font-size: 2.2rem; }
+            .character-name { font-size: 2.6rem; }
+            .question-text { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="test-container">
+    <div id="welcomeScreen" class="screen welcome-screen active">
+        <div class="military-badge"><i class="fas fa-skull"></i><span>炮灰团·招魂测试</span><i class="fas fa-skull"></i></div>
+        <h1>我的团长<br>我的团</h1>
+        <div class="subhead">35道叩问 · 寻找你的袍泽兄弟</div>
+        <div class="quote-block">
+            <div class="quote-text">“岂曰无衣，与子同袍。岂曰无衣，与子同仇。”</div>
+            <div class="quote-author">—— 川军团 · 禅达收容所</div>
+        </div>
+        <p style="color:#b3aa99; margin:10px 0 18px;">你是死啦死啦的疯魔？还是烦啦的清醒？<br>走进禅达，到该死的树堡前细数。</p>
+        <button class="btn" id="startBtn">开始招魂 <i class="fas fa-arrow-right"></i></button>
+        <div class="character-preview">
+            <span class="char-tag">龙文章</span><span class="char-tag">孟烦了</span><span class="char-tag">迷龙</span>
+            <span class="char-tag">虞啸卿</span><span class="char-tag">郝兽医</span><span class="char-tag">阿译</span>
+            <span class="char-tag">不辣</span><span class="char-tag">克虏伯</span><span class="char-tag">张立宪</span>
+            <span class="char-tag">丧门星</span><span class="char-tag">豆饼</span><span class="char-tag">何书光</span>
+            <span class="char-tag">陈小醉</span><span class="char-tag">上官戒慈</span><span class="char-tag">唐基</span>
+            <span class="char-tag">康丫</span>
+        </div>
+    </div>
+    <div id="testScreen" class="screen test-screen">
+        <div class="test-header">
+            <div class="progress-container"><div class="progress-bar-bg"><div id="progressFill" class="progress-fill" style="width:0%"></div></div></div>
+            <div class="q-counter" id="questionCounter">1 / 35</div>
+        </div>
+        <div class="question-card">
+            <div class="question-text" id="questionText">加载中...</div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" disabled><i class="fas fa-chevron-left"></i> 上一题</button>
+            <button class="nav-btn" id="nextBtn">下一题 <i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div id="resultScreen" class="screen results-screen">
+        <div class="result-header">
+            <div class="result-badge"><i class="fas fa-flag"></i> 你骨子里是</div>
+            <div class="character-name" id="resultName">龙文章</div>
+            <div class="character-nickname" id="resultNick">—— 死啦死啦</div>
+        </div>
+        <div class="character-desc" id="resultDesc"></div>
+        <div class="match-stats">
+            <div class="stat-item"><span class="stat-value" id="matchPercent">94%</span><div class="stat-label">匹配度</div></div>
+            <div class="stat-item"><span class="stat-value" id="secondChar">孟烦了</span><div class="stat-label">次高倾向</div></div>
+        </div>
+        <div class="action-buttons">
+            <button class="btn" id="retakeBtn" style="max-width:100%"><i class="fas fa-undo-alt"></i> 重新招魂</button>
+        </div>
+        <div class="small-note"><i class="fas fa-scroll"></i> 岂曰无衣，与子同袍 —— 川军团</div>
+    </div>
+</div>
+<script>
+    (function(){
+        // ---------- 角色定义 ----------
+        const CHARACTERS = {
+            longwenzhang: {name:'龙文章',nickname:'死啦死啦',desc:'你是炮灰团的灵魂，给兵渣们招魂，你看似疯癫却心怀大义。你从西岸的死人堆里爬出来，捡了个团长的名号，却比任何人都清楚“走啊，我带你们回家”有多重。你欠南天门上一千多座坟，你得带他们回家。'},
+            mengfanle: {name:'孟烦了',nickname:'烦恼了却',desc:'你曾是学生兵，读过书，你曾比谁都爱少年中国，但你被战争摧残得麻木，丢了一条腿。你太聪明，聪明到看透一切却无法挣脱。你爱损人、怀疑、逃避，但你年轻、心里干净，嘴上恶毒损人的话不停，心里却比谁都想要一个答案。'},
+            milong: {name:'迷龙',nickname:'东北佬',desc:'你从东北一路溃败到云南，丢了家，却在这里又有了家。你豪爽仗义，爱恨分明，总把“我整死你”挂在嘴边，却最重情义。你是炮灰团里最热爱生活的人，你是丢了东北的黑尾巴龙。'},
+            yuxiaoqing: {name:'虞啸卿',nickname:'铁血师长',desc:'你刚正不阿，志在救国，你是有着残忍的天真的赤子。你崇尚岳飞，有着军人的骄傲，但南天门下的一纸“攻击立止”，几近压垮了你的脊梁。你心中有亏欠，你必须要去面对你愧对了一生的挚友'},
+            haoxichuan: {name:'郝西川',nickname:'郝兽医',desc:'你是炮灰团的父亲，从没救活过人，却用善意温暖每一个兄弟。你温和、隐忍、慈悲，看似无用，但没了你，团就不是团。烦啦说你是“老天使”，你就是。'},
+            ayi: {name:'林译',nickname:'阿译长官',desc:'你衣冠整洁，总是说官话套话，你与烦啦一体两面。你崇拜龙文章，梦想成为英雄，在树堡里唱着《野草闲花蓬春生》，最后用生命诠释了信仰。阿译啊阿译，你总错。'},
+            bula: {name:'邓宝',nickname:'不辣',desc:'你乐观勇敢，一口湖南腔，天不怕地不怕。“中华要灭亡，湖南人先死绝。”你永远积极，敢打敢拼，哪怕最后一条腿蹦回家，也从不服输。'},
+            keluobo: {name:'时小毛',nickname:'克虏伯',desc:'你沉默寡言，除了打炮就是吃饭。但只要团长一声令下，你的炮弹就精准摧毁敌人。士为知己者死，团长死了，你也随他而去。你是无畏的勇士。'},
+            zhanglixian: {name:'张立宪',nickname:'精锐军官',desc:'你曾经意气风发，信仰坚定，是虞师的精锐。但南天门让你看见现实的泥泞，你聪明、骄傲、重荣誉，最终挣扎在信仰与真相之间，选择了自己的路。'},
+            sangmenxing: {name:'董刀',nickname:'丧门星',desc:'你沉默、坚毅，像一把未出鞘的刀。你背着弟弟的骨灰打仗，无人时你与小剑说些话，你们要一起回家。你恩怨分明，是条响当当的汉子。'},
+            doubing: {name:'谷小麦',nickname:'豆饼',desc:'你单纯得像一张白纸，认准了迷龙就一根筋跟随。你是炮灰团的人形骡子，扛着马克沁的枪架，从没抱怨过。你最后沉入怒江，连回声都没有。'},
+            heshuguang: {name:'何书光',nickname:'手风琴',desc:'你原本是虞师的精锐，是虞师大男孩之一，你看不起孟烦了他们那样的炮灰。可渐渐地，你被那群人同化，也见识到了战争的残酷。最后你与敌同归于尽，你找到了比精锐身份更重要的东西。小何死了，小何说，虞师座万岁'},
+            chenxiaozui: {name:'陈小醉',nickname:'小醉',desc:'“最好的最？”“喝醉的醉！”你单纯、坚韧，在乱世里拼命活着，也拼命爱着。你是勇敢又坚强的姑娘，你代表着所有美好与等待，还有那座小院子里的阳光。'},
+            shangguanjieci: {name:'上官戒慈',nickname:'戒嗔戒痴',desc:'你悲天悯人，把死亡归咎于战争，把战争归咎于反抗，把反抗归咎于好战，把好战归咎于争功，把争功归咎于野心，把野心归咎于本性，把本性归咎于残忍。'},
+            tangji: {name:'唐基',nickname:'唐副师座',desc:'你深谙为官之道，是虞啸卿背后的影子。你圆滑、世故，总在权衡利弊，但你并非全无心肝。你只是在用自己的方式让事情“办得下去”，哪怕这方式让热血者心寒。你相信活着才能做事。'},
+            kangya: {name:'康火镰',nickname:'康丫',desc:'你是运输兵，开着车在炮火中穿梭。你没什么大志向，只想活下去，但关键时刻从不掉链子。你是炮灰团里最普通的那类人，却也是不可或缺的基石。'}
+        };
+
+        // ---------- 35道深度剧情题目 ----------
+        const QUESTIONS = [
+            {text:"溃兵如潮，前路茫茫。你最可能怎么做？",options:[
+                {text:"扯起一面旗，哪怕坑蒙拐骗也要把人拢在一起",weights:{longwenzhang:5,ayi:2}},
+                {text:"先观察境况，想好自己的退路",weights:{mengfanle:5,kangya:3,tangji:2}},
+                {text:"管他娘的打回去，死也要拉个垫背",weights:{milong:5,bula:4,sangmenxing:3}},
+                {text:"先护住身边这几个，再找活路",weights:{haoxichuan:5,heshuguang:3,doubing:3}}
+            ]},
+            {text:"你怎样看待“活着”这件事？",options:[
+                {text:"活着就得做事，要有意义地活",weights:{longwenzhang:5,ayi:4, yuxiaoqing:5}},
+                {text:"无需去承担太多责任，过好当下",weights:{mengfanle:5,kangya:4,tangji:2}},
+                {text:"享受人生，活着就得有滋有味",weights:{milong:5,shangguanjieci:4}},
+                {text:"活着是为了让身边的人能活下去",weights:{haoxichuan:5,doubing:5,chenxiaozui:4}}
+            ]},
+            {text:"队伍里，你通常扮演什么角色？",options:[
+                {text:"出主意、带节奏，把散沙捏成团",weights:{longwenzhang:5,yuxiaoqing:4}},
+                {text:"把自己的事做好，躲在角落吐槽领导",weights:{mengfanle:5,kangya:3}},
+                {text:"冲在最前面，指哪打哪，不过也有自己的想法",weights:{milong:5,bula:5,sangmenxing:3, heshuguang:3, zhanglixian:4}},
+                {text:"处理纠纷，调和矛盾，当个和事佬",weights:{haoxichuan:5,tangji:4,doubing:3}}
+            ]},
+            {text:"你最无法忍受哪种人？",options:[
+                {text:"说一套做一套的官僚",weights:{longwenzhang:4,milong:3,yuxiaoqing:5}},
+                {text:"愚蠢又固执的蠢货",weights:{mengfanle:5,zhanglixian:3,tangji:4}},
+                {text:"倒戈的叛徒小人",weights:{milong:5,bula:5,sangmenxing:5,heshuguang:4}},
+                {text:"轻视生命、对他人苦难无动于衷的人",weights:{haoxichuan:5,doubing:4,chenxiaozui:5,shangguanjieci:5}}
+            ]},
+            {text:"强敌当前，你的第一反应是？",options:[
+                {text:"用一切手段周旋，哪怕使诈",weights:{longwenzhang:5,mengfanle:3}},
+                {text:"评估胜算，不做无谓牺牲",weights:{yuxiaoqing:5,zhanglixian:4,tangji:5}},
+                {text:"冲啊冲杨六郎，干爆他们",weights:{milong:5,bula:5,heshuguang:4}},
+                {text:"先想怎么把伤亡降到最低",weights:{haoxichuan:5,shangguanjieci:4}}
+            ]},
+            {text:"你怎么看待规则？",options:[
+                {text:"规矩是死的，人是活的，该绕就绕",weights:{longwenzhang:5,mengfanle:4}},
+                {text:"明面上服从规则，内心想挣脱它",weights:{yuxiaoqing:5,zhanglixian:4}},
+                {text:"妨碍到自己就不管它",weights:{milong:4,bula:3,heshuguang:2}},
+                {text:"规则存在则有意义，遵守即可",weights:{haoxichuan:4,doubing:3,ayi:5}}
+            ]},
+            {text:"你觉得“信仰”是什么？",options:[
+                {text:"是活着的支撑，哪怕荒诞",weights:{longwenzhang:5,ayi:4,keluobo:3}},
+                {text:"曾经有过，但被惨淡现实粉碎了",weights:{mengfanle:5,zhanglixian:3}},
+                {text:"就是身边这些活生生的人",weights:{milong:5,haoxichuan:4,doubing:5,shangguanjieci:5,chenxiaozui:5}},
+                {text:"自己为之而生",weights:{yuxiaoqing:5,zhanglixian:4,heshuguang:3}}
+            ]},
+            {text:"朋友犯了事，你会？",options:[
+                {text:"想尽办法捞他，哪怕自己背处分",weights:{longwenzhang:5,milong:5}},
+                {text:"按规矩办，但心里不是滋味",weights:{yuxiaoqing:5,zhanglixian:3,tangji:4}},
+                {text:"骂他蠢，然后帮他想辙",weights:{mengfanle:5,bula:3}},
+                {text:"劝他认了，争取从轻发落",weights:{haoxichuan:5,heshuguang:3,ayi:4}}
+            ]},
+            {text:"你喜欢什么样的日子？",options:[
+                {text:"轰轰烈烈，干一番大事，成就功业",weights:{longwenzhang:4,yuxiaoqing:4,ayi:3}},
+                {text:"安安静静，远离是非",weights:{mengfanle:4,kangya:5,chenxiaozui:5}},
+                {text:"安稳快活，偶尔来几次新奇挑战或和朋友小聚",weights:{milong:5,bula:5,heshuguang:4}},
+                {text:"平平淡淡，书与茶与家人",weights:{doubing:5,haoxichuan:4,shangguanjieci:5,chenxiaozui:4}}
+            ]},
+            {text:"你觉得自己最大的问题是什么？",options:[
+                {text:"脑回路太跳跃，想法太多",weights:{longwenzhang:5}},
+                {text:"太容易悲观待事，自寻烦恼",weights:{mengfanle:5}},
+                {text:"冲动，不计后果",weights:{milong:5,bula:4,chenxiaozui:3,heshuguang:3}},
+                {text:"太容易反思自己，不敢说不敢争",weights:{ayi:5,doubing:3}}
+            ]},
+            {text:"你最喜欢和什么人相处交往？",options:[
+                {text:"赤诚但固执之人，亦会灼伤他人",weights:{longwenzhang:4,yuxiaoqing:4}},
+                {text:"善良纯粹之人，拥有一颗金子般的心",weights:{mengfanle:5,zhanglixian:5,chenxiaozui:4}},
+                {text:"聪明灵活之人，懂分寸",weights:{tangji:5,bula:2,ayi:4}},
+                {text:"热爱生活、爱己爱他人之人",weights:{haoxichuan:5,shangguanjieci:5,milong:4,doubing:4,sangmenxing:3}}
+            ]},
+            {text:"有人公开质疑你的决定，你会？",options:[
+                {text:"想办法让他心服口服",weights:{longwenzhang:4,yuxiaoqing:4,tangji:4}},
+                {text:"阴阳怪气怼回去",weights:{mengfanle:5,bula:4,shangguanjieci:4,zhanglixian:3}},
+                {text:"不服就干一架",weights:{milong:5,sangmenxing:4,heshuguang:4}},
+                {text:"随他去，懒得理",weights:{kangya:5,haoxichuan:3}}
+            ]},
+            {text:"在你心里，什么排第一？",options:[
+                {text:"把事情做成",weights:{longwenzhang:5,yuxiaoqing:4,tangji:5}},
+                {text:"守住原则，把理讲清",weights:{mengfanle:5,zhanglixian:3,shangguanjieci:3}},
+                {text:"把最亲之人护住",weights:{milong:5,haoxichuan:5,doubing:4,sangmenxing:4}},
+                {text:"把自己保住",weights:{kangya:5,tangji:3}}
+            ]},
+            {text:"“回家”这两个字，让你想起什么？",options:[
+                {text:"要把这帮人都带回去",weights:{longwenzhang:5,haoxichuan:4}},
+                {text:"那里谁都不在了，它放置着我褪色的过往与梦想",weights:{mengfanle:5,ayi:5,chenxiaozui:3}},
+                {text:"温暖的归栖之所",weights:{milong:5,shangguanjieci:5,chenxiaozui:3}},
+                {text:"总要回去的",weights:{bula:5,doubing:5,sangmenxing:3,keluobo:3,kangya:4}}
+            ]},
+            {text:"你怎么看待死亡？",options:[
+                {text:"死是归途，但活着就得折腾",weights:{longwenzhang:5}},
+                {text:"怕死，但更怕死得窝囊",weights:{mengfanle:4,milong:3}},
+                {text:"人生自古谁无死？留取丹心照汗青",weights:{bula:5,sangmenxing:5,heshuguang:3,yuxiaoqing:4}},
+                {text:"虚无之地，厌恶无意义的杀戮所导致的死亡",weights:{haoxichuan:5,doubing:4,chenxiaozui:4,shangguanjieci:5}}
+            ]},
+            {text:"你觉得“义气”是什么？",options:[
+                {text:"同生共死，不抛弃不放弃",weights:{longwenzhang:5,milong:5,bula:5}},
+                {text:"虽然平时互相损损，但关键时刻不掉链子",weights:{mengfanle:5,heshuguang:4,bula:3,ayi:3}},
+                {text:"岂曰无衣，与子同袍",weights:{yuxiaoqing:4,zhanglixian:4,sangmenxing:3}},
+                {text:"能帮一把是一把",weights:{haoxichuan:5,shangguanjieci:4,chenxiaozui:3}}
+            ]},
+            {text:"打仗时，你更倾向于？",options:[
+                {text:"带大家一起冲",weights:{longwenzhang:4,yuxiaoqing:4}},
+                {text:"在后面观察，找机会",weights:{mengfanle:5,kangya:4}},
+                {text:"单干，杀一个够本",weights:{milong:5,sangmenxing:5}},
+                {text:"做好后勤，救治伤员",weights:{heshuguang:5,doubing:4,shangguanjieci:5}}
+            ]},
+            {text:"你觉得什么最珍贵？",options:[
+                {text:"希望",weights:{longwenzhang:3,ayi:4}},
+                {text:"清醒",weights:{mengfanle:5,zhanglixian:3}},
+                {text:"身边人的平安",weights:{milong:5,haoxichuan:5,chenxiaozui:5,shangguanjieci:5}},
+                {text:"活下去的机会",weights:{kangya:5,tangji:4}}
+            ]},
+            {text:"炮灰团里，你更像谁？",options:[
+                {text:"先行者、领导者",weights:{longwenzhang:3,yuxiaoqing:3}},
+                {text:"吐槽担当",weights:{mengfanle:5}},
+                {text:"推进的执行者",weights:{milong:5,bula:5,heshuguang:4}},
+                {text:"老好人",weights:{haoxichuan:5,doubing:4}}
+            ]},
+            {text:"如果牺牲不可避免，你希望？",options:[
+                {text:"死得有价值，能唤醒什么",weights:{longwenzhang:5,ayi:5}},
+                {text:"至少拉几个垫背",weights:{mengfanle:3,milong:4,bula:5}},
+                {text:"至少守护住重要之人",weights:{haoxichuan:5,sangmenxing:4,keluobo:3,shangguanjieci:3}},
+                {text:"安安静静地离开",weights:{kangya:5,chenxiaozui:3}}
+            ]},
+            {text:"你平时话多吗？",options:[
+                {text:"话多，能忽悠",weights:{longwenzhang:4,mengfanle:4}},
+                {text:"话多，尖锐毒舌",weights:{mengfanle:5,bula:4}},
+                {text:"话不多，但句句带劲",weights:{milong:5,bula:3}},
+                {text:"基本不说话",weights:{keluobo:5,sangmenxing:5}}
+            ]},
+            {text:"你对上级的态度？",options:[
+                {text:"表面恭敬，心里有自己的主意",weights:{longwenzhang:4,mengfanle:6}},
+                {text:"服从但会尽力抗争不合理之处",weights:{yuxiaoqing:4,zhanglixian:5,heshuguang:3}},
+                {text:"看他是不是个东西",weights:{milong:4,bula:3}},
+                {text:"能躲就躲",weights:{kangya:5,tangji:3}}
+            ]},
+            {text:"你会为什么流泪？",options:[
+                {text:"为死去的骨血同胞",weights:{longwenzhang:4,haoxichuan:5}},
+                {text:"为自己的无能为力",weights:{mengfanle:5,zhanglixian:4, yuxiaoqing:3}},
+                {text:"为至亲家人",weights:{milong:5,doubing:5,shangguanjieci:5,chenxiaozui:5}},
+                {text:"很少流泪",weights:{sangmenxing:5,bula:3}}
+            ]},
+            {text:"你身上最“炮灰”的地方是？",options:[
+                {text:"明知不可为而为之",weights:{longwenzhang:3,ayi:4}},
+                {text:"一边绝望一边活着",weights:{mengfanle:5}},
+                {text:"为朋友两肋插刀",weights:{milong:5,bula:5,sangmenxing:4,heshuguang:4}},
+                {text:"渺小，但想护住点什么",weights:{haoxichuan:5,doubing:5,chenxiaozui:5}}
+            ]},
+            {text:"最后一颗子弹，你留给谁？",options:[
+                {text:"敌人",weights:{mengfanle:3,milong:5,bula:5,sangmenxing:5}},
+                {text:"自己",weights:{longwenzhang:4,yuxiaoqing:3,ayi:4}},
+                {text:"留给最需要的人",weights:{haoxichuan:5,shangguanjieci:4,zhanglixian:3}},
+                {text:"不知道",weights:{kangya:5,doubing:3}}
+            ]},
+            {text:"禅达对你而言是什么？",options:[
+                {text:"最后一块阵地",weights:{longwenzhang:5,yuxiaoqing:5}},
+                {text:"悲伤之地，有太多回忆",weights:{mengfanle:4,milong:3,shangguanjieci:5}},
+                {text:"感情深厚的家",weights:{haoxichuan:5,bula:4,chenxiaozui:5}},
+                {text:"没啥感觉",weights:{kangya:5}}
+            ]},
+            {text:"若能在和平年代，你会？",options:[
+                {text:"成就一番自己的功业",weights:{longwenzhang:3,yuxiaoqing:3,tangji:3}},
+                {text:"当个普通人，安生过日子",weights:{mengfanle:5,kangya:5,chenxiaozui:5,shangguanjieci:5,keluobo:4}},
+                {text:"开个馆子，朋友常聚",weights:{milong:5,heshuguang:4,bula:4}},
+                {text:"远离喧嚣，找个没人地儿待着",weights:{sangmenxing:5,doubing:3}}
+            ]},
+            {text:"哪种颜色更像你？",options:[
+                {text:"养育我们的土黄",weights:{longwenzhang:3,haoxichuan:4,chenxiaozui:3}},
+                {text:"雾色中南天门的灰绿",weights:{zhanglixian:4,heshuguang:3,tangji:2,ayi:3}},
+                {text:"血的暗红",weights:{milong:5,bula:5,yuxiaoqing:3}},
+                {text:"硝烟的黑灰",weights:{mengfanle:5,kangya:4,sangmenxing:3,shangguanjieci:2}}
+            ]},
+            {text:"哪句台词最戳你？",options:[
+                {text:"“岂曰无衣，与子同袍”",weights:{longwenzhang:4,haoxichuan:5}},
+                {text:"“我年轻而苍老的祖国”",weights:{mengfanle:5,ayi:4}},
+                {text:"“我整死你”",weights:{milong:5,bula:3}},
+                {text:"“攻击立止”",weights:{yuxiaoqing:5,tangji:4}}
+            ]},
+            {text:"面对现实与理想的冲突，你倾向于？",options:[
+                {text:"曲线救国，先活下去再谈理想",weights:{tangji:5,mengfanle:3,kangya:3,longwenzhang:2}},
+                {text:"理想不容玷污，宁折不弯",weights:{yuxiaoqing:4,zhanglixian:4,ayi:4,keluobo:3}},
+                {text:"管他呢，干就完了",weights:{milong:4,bula:5,sangmenxing:4}},
+                {text:"在夹缝里尽力保全更多人",weights:{haoxichuan:5,shangguanjieci:4}}
+            ]},
+            {text:"你如何理解“精锐”与“炮灰”的区别？",options:[
+                {text:"没什么区别，都是炮灰",weights:{mengfanle:5,longwenzhang:5}},
+                {text:"精锐是骄傲，炮灰是命",weights:{zhanglixian:5,heshuguang:5}},
+                {text:"炮灰更有人味儿",weights:{haoxichuan:5,doubing:4,milong:4}},
+                {text:"能活下来的就是精锐",weights:{tangji:4,kangya:5,bula:4}}
+            ]},
+            {text:"乱世之中，你更愿意相信什么？",options:[
+                {text:"自己的经验和判断",weights:{longwenzhang:4,mengfanle:5,zhanglixian:3}},
+                {text:"身边的挚友",weights:{milong:5,haoxichuan:5,bula:5,doubing:5,keluobo:3}},
+                {text:"身居高位的权力",weights:{yuxiaoqing:4,heshuguang:4,tangji:5}},
+                {text:"命运自有安排",weights:{kangya:4,chenxiaozui:3,tangji:3,ayi:3}}
+            ]},
+            {text:"你觉得一个人最大的失败是什么？",options:[
+                {text:"丢了魂，没了信念",weights:{longwenzhang:4,ayi:4}},
+                {text:"辜负了在乎的人",weights:{mengfanle:5,milong:5,haoxichuan:5,chenxiaozui:3}},
+                {text:"一事无成",weights:{yuxiaoqing:4,zhanglixian:4}},
+                {text:"身不由己",weights:{kangya:4,tangji:5}}
+            ]},
+            {text:"如果必须在“烂透了的现实”和“渺茫的希望”中选一个，你选？",options:[
+                {text:"希望，哪怕渺茫",weights:{longwenzhang:5,ayi:5,chenxiaozui:5}},
+                {text:"现实，先活下来再谈理想",weights:{mengfanle:4,tangji:5,kangya:5,zhanglixian:3}},
+                {text:"把烂现实砸碎",weights:{milong:5,bula:5,heshuguang:4}},
+                {text:"守着身边的人，等天亮",weights:{haoxichuan:5,doubing:5,shangguanjieci:5}}
+            ]},
+            {text:"最后的最后，你希望留下什么？",options:[
+                {text:"有人记得我们",weights:{longwenzhang:5,ayi:5,chenxiaozui:3}},
+                {text:"能回家",weights:{mengfanle:5,milong:5,doubing:5,shangguanjieci:5}},
+                {text:"胜利",weights:{yuxiaoqing:5,bula:5,heshuguang:4}},
+                {text:"平静",weights:{haoxichuan:5,kangya:5}}
+            ]}
+        ];
+
+        // 状态管理
+        let currentIndex = 0;
+        let answers = new Array(35).fill(null);
+        let scores = {};
+
+        const welcome=document.getElementById('welcomeScreen'), test=document.getElementById('testScreen'), result=document.getElementById('resultScreen');
+        const qText=document.getElementById('questionText'), optsDiv=document.getElementById('optionsContainer'), prev=document.getElementById('prevBtn'), next=document.getElementById('nextBtn');
+        const counter=document.getElementById('questionCounter'), progress=document.getElementById('progressFill');
+
+        function switchScreen(id){ [welcome,test,result].forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+        function renderQuestion(){
+            const q = QUESTIONS[currentIndex];
+            qText.textContent = q.text;
+            optsDiv.innerHTML = '';
+            q.options.forEach((opt, idx)=>{
+                const div = document.createElement('div');
+                div.className = 'option' + (answers[currentIndex] === idx ? ' selected' : '');
+                div.innerHTML = `<i class="fas fa-dharmachakra"></i> ${opt.text}`;
+                div.addEventListener('click', ()=>{
+                    answers[currentIndex] = idx;
+                    renderQuestion();
+                });
+                optsDiv.appendChild(div);
+            });
+            counter.textContent = `${currentIndex+1} / 35`;
+            progress.style.width = ((currentIndex+1)/35*100)+'%';
+            prev.disabled = currentIndex === 0;
+            next.textContent = currentIndex === 34 ? '完成' : '下一题';
+        }
+
+        function calculateResult(){
+            scores = {};
+            answers.forEach((ans, i)=>{
+                if(ans !== null){
+                    const w = QUESTIONS[i].options[ans].weights;
+                    for(let c in w) {
+                        scores[c] = (scores[c] || 0) + w[c];
+                    }
+                }
+            });
+
+            let topChar = Object.keys(scores).reduce((a,b)=> scores[a]>scores[b] ? a : b);
+            let maxScore = scores[topChar] || 0;
+            let percent = Math.min(99, Math.round((maxScore / 140) * 100));
+            let second = Object.keys(scores).filter(c=>c!==topChar).sort((a,b)=>scores[b]-scores[a])[0] || topChar;
+
+            document.getElementById('resultName').textContent = CHARACTERS[topChar].name;
+            document.getElementById('resultNick').textContent = '—— ' + CHARACTERS[topChar].nickname;
+            document.getElementById('resultDesc').textContent = CHARACTERS[topChar].desc;
+            document.getElementById('matchPercent').textContent = percent + '%';
+            document.getElementById('secondChar').textContent = CHARACTERS[second].name;
+            switchScreen('resultScreen');
+        }
+
+        document.getElementById('startBtn').addEventListener('click', ()=>{
+            currentIndex = 0; answers.fill(null); renderQuestion(); switchScreen('testScreen');
+        });
+        prev.addEventListener('click', ()=>{
+            if(currentIndex > 0){ currentIndex--; renderQuestion(); }
+        });
+        next.addEventListener('click', ()=>{
+            if(answers[currentIndex] === null){ alert('请选择一个选项'); return; }
+            if(currentIndex < 34){ currentIndex++; renderQuestion(); }
+            else { calculateResult(); }
+        });
+        document.getElementById('retakeBtn').addEventListener('click', ()=>{
+            currentIndex = 0; answers.fill(null); switchScreen('welcomeScreen');
+        });
+    })();
+</script>
+</body>
+</html>
